@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# macOS 电子书发送工具安装脚本
-# 安装脚本到系统，并创建右键菜单
+# macOS ebook sending tool installer script / macOS 电子书发送工具安装脚本
+# Install script to system and create right-click menu / 安装脚本到系统，并创建右键菜单
 
 set -e
 
@@ -22,48 +22,48 @@ log_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-echo "📚 电子书发送工具 - macOS 安装程序"
+echo "📚 Ebook sending tool - macOS installer / 电子书发送工具 - macOS 安装程序"
 echo ""
 
-# 1. 创建目录
+# 1. Create directories / 创建目录
 BIN_DIR="$HOME/bin"
 SERVICES_DIR="$HOME/Library/Services"
 
 mkdir -p "$BIN_DIR"
 mkdir -p "$SERVICES_DIR"
 
-# 2. 复制脚本文件
+# 2. Copy script file / 复制脚本文件
 SCRIPT_FILE=""
 if [ -f "send_ebook.sh" ]; then
     SCRIPT_FILE="send_ebook.sh"
 elif [ -f "$(dirname "$0")/send_ebook.sh" ]; then
     SCRIPT_FILE="$(dirname "$0")/send_ebook.sh"
 else
-    log_error "找不到 send_ebook.sh 文件"
-    echo "请确保 send_ebook.sh 与安装脚本在同一目录，或在当前目录中"
+    log_error "Cannot find send_ebook.sh file / 找不到 send_ebook.sh 文件"
+    echo "Please ensure send_ebook.sh is in the same directory as installer script, or in current directory / 请确保 send_ebook.sh 与安装脚本在同一目录，或在当前目录中"
     exit 1
 fi
 
 cp "$SCRIPT_FILE" "$BIN_DIR/"
 chmod +x "$BIN_DIR/send_ebook.sh"
-log_info "已安装脚本到: $BIN_DIR/send_ebook.sh"
+log_info "Script installed to / 已安装脚本到: $BIN_DIR/send_ebook.sh"
 
-# 3. 创建配置文件模板
+# 3. Create configuration file template / 创建配置文件模板
 CONFIG_FILE="$HOME/.ebook_config"
 if [ ! -f "$CONFIG_FILE" ]; then
     cat > "$CONFIG_FILE" << 'EOF'
-# 电子书发送配置文件
+# Ebook sending configuration file / 电子书发送配置文件
 FROM_EMAIL="your@gmail.com"
 APP_PASSWORD="your app password"
 TO_EMAIL="your_kindle@kindle.com"
 EOF
-    log_info "已创建配置文件模板: $CONFIG_FILE"
-    log_warn "请编辑配置文件填入正确信息"
+    log_info "Configuration file template created / 已创建配置文件模板: $CONFIG_FILE"
+    log_warn "Please edit configuration file with correct information / 请编辑配置文件填入正确信息"
 else
-    log_info "配置文件已存在: $CONFIG_FILE"
+    log_info "Configuration file already exists / 配置文件已存在: $CONFIG_FILE"
 fi
 
-# 4. 添加到PATH (如果需要)
+# 4. Add to PATH (if needed) / 添加到PATH (如果需要)
 SHELL_RC=""
 if [ "$SHELL" = "/bin/zsh" ] || [ "$SHELL" = "/usr/bin/zsh" ]; then
     SHELL_RC="$HOME/.zshrc"
@@ -74,17 +74,17 @@ fi
 if [ -n "$SHELL_RC" ] && [ -f "$SHELL_RC" ]; then
     if ! grep -q "export PATH.*$BIN_DIR" "$SHELL_RC"; then
         echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$SHELL_RC"
-        log_info "已添加到PATH: $SHELL_RC"
+        log_info "Added to PATH / 已添加到PATH: $SHELL_RC"
     fi
 fi
 
-# 5. 创建Automator Quick Action
+# 5. Create Automator Quick Action / 创建Automator快速操作
 WORKFLOW_PATH="$SERVICES_DIR/Send to Kindle.workflow"
 
 if [ ! -d "$WORKFLOW_PATH" ]; then
     mkdir -p "$WORKFLOW_PATH/Contents"
     
-    # 创建Info.plist
+    # Create Info.plist / 创建Info.plist
     cat > "$WORKFLOW_PATH/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -102,7 +102,7 @@ if [ ! -d "$WORKFLOW_PATH" ]; then
 </plist>
 EOF
 
-    # 创建document.wflow
+    # Create document.wflow / 创建document.wflow
     cat > "$WORKFLOW_PATH/Contents/document.wflow" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -248,27 +248,27 @@ EOF
 </plist>
 EOF
 
-    log_info "已创建右键菜单: Send to Kindle"
+    log_info "Right-click menu created / 已创建右键菜单: Send to Kindle"
 else
-    log_info "右键菜单已存在"
+    log_info "Right-click menu already exists / 右键菜单已存在"
 fi
 
 echo ""
-log_info "安装完成！"
+log_info "Installation completed! / 安装完成！"
 echo ""
-echo "下一步操作："
-echo "1. 编辑配置文件: nano ~/.ebook_config"
-echo "2. 获取Gmail App Password并填入配置"
-echo "3. 使用方法:"
-echo "   - 命令行: send_ebook.sh book.pdf"
-echo "   - 右键菜单: 选择文件 -> 快速操作 -> Send to Kindle"
+echo "Next steps / 下一步操作："
+echo "1. Edit configuration file / 编辑配置文件: nano ~/.ebook_config"
+echo "2. Get Gmail App Password and fill in configuration / 获取Gmail App Password并填入配置"
+echo "3. Usage / 使用方法:"
+echo "   - Command line / 命令行: send_ebook.sh book.pdf"
+echo "   - Right-click menu / 右键菜单: Select file -> Quick Actions -> Send to Kindle / 选择文件 -> 快速操作 -> Send to Kindle"
 echo ""
-echo "App Password获取方法:"
-echo "1. 开启两步验证: https://myaccount.google.com/security"
-echo "2. 生成应用专用密码: 安全性 -> 应用专用密码"
+echo "App Password setup method / App Password获取方法:"
+echo "1. Enable two-factor authentication / 开启两步验证: https://myaccount.google.com/security"
+echo "2. Generate app-specific password / 生成应用专用密码: Security -> App passwords / 安全性 -> 应用专用密码"
 echo ""
 
-# 检查是否需要重启终端
+# Check if terminal restart is needed / 检查是否需要重启终端
 if [ -n "$SHELL_RC" ]; then
-    log_warn "请重启终端或运行: source $SHELL_RC"
+    log_warn "Please restart terminal or run / 请重启终端或运行: source $SHELL_RC"
 fi
